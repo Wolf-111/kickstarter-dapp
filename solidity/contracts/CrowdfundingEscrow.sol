@@ -21,6 +21,7 @@ contract CrowdfundingEscrow {
     address payable public creator;
     mapping(address => uint) public commitmentAmounts;
 
+    //["TestTitle","Cool",1651273213,10000]
     constructor(string memory _title, string memory _description, uint _endDate, uint _goalAmount){
         title = _title;
         description = _description;
@@ -39,6 +40,8 @@ contract CrowdfundingEscrow {
 
     function commitFunds() public payable {
         require(block.timestamp < endDate, "Error: Escrow is closed");
+        require(msg.sender.balance > 0, "Error: No funds");
+
         totalAmountRaised += msg.value;
         commitmentAmounts[msg.sender] += msg.value;
         if(totalAmountRaised >= goalAmount){
@@ -47,19 +50,16 @@ contract CrowdfundingEscrow {
     }
 
     // Allow the funds committer to change their mind
-    function cancelCommitment(address payable _address, uint _amount) public payable {
+    function cancelCommitment(uint _amount) public payable {
         require(block.timestamp < endDate, "Error: Escrow is closed");
-        require(commitmentAmounts[_address] > 0, "Error: No commitment amount found");
-        _address.transfer(_amount);
+        require(commitmentAmounts[msg.sender] > 0, "Error: No commitment amount found");
+        payable(msg.sender).transfer(_amount);
+        totalAmountRaised -= _amount;
 
         // The goalAmount can be true but then change to false if
         // someone cancels their commitment
         if(totalAmountRaised < goalAmount){
             goalAmountAchieved = false;
         }
-    }
-
-    function viewTotalAmountRaised() public view returns(uint){
-        return totalAmountRaised;
     }
 }
