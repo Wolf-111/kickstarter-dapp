@@ -21,7 +21,6 @@ contract CrowdfundingEscrow {
     address payable public creator;
     mapping(address => uint) public commitmentAmounts;
 
-    //["TestTitle","Cool",1651273213,10000]
     constructor(string memory _title, string memory _description, uint _endDate, uint _goalAmount){
         title = _title;
         description = _description;
