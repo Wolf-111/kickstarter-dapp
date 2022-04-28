@@ -12,32 +12,51 @@ import "hardhat/console.sol";
 */
 
 contract CrowdfundingEscrow {
-    string name;
-    string description;v
-    uint endDate;
-    uint goalAmount;
-    uint totalAmountRaised;
-    address payable creator;
+    string public title;
+    string public description;
+    uint public endDate;
+    uint public goalAmount;
+    bool public goalAmountAchieved;
+    uint public totalAmountRaised;
+    address payable public creator;
     mapping(address => uint) public commitmentAmounts;
 
-    constructor(string _name, string _description, uint _endDate, uint _goalAmount){
-        name = _name;
+    constructor(string memory _title, string memory _description, uint _endDate, uint _goalAmount){
+        title = _title;
         description = _description;
         endDate = _endDate;
         goalAmount = _goalAmount;
         creator = payable(msg.sender);
     }
 
-    function commitFunds() public payable {
-        // require current date is less than endDate
-        totalAmountRaised += msg.value;
-        commitmentAmounts[msg.sender] += msg.value;
+    // Once endDate is reached, send the funds held in escrow
+    // to the owner of the contract
+    function closeEscrow() public payable {
+        require(block.timestamp >= endDate, "Error: endDate has not been reached");
+        require(totalAmountRaised > 0, "Error: No funds were raised");
+        creator.transfer(totalAmountRaised);
     }
 
+    function commitFunds() public payable {
+        require(block.timestamp < endDate, "Error: Escrow is closed");
+        totalAmountRaised += msg.value;
+        commitmentAmounts[msg.sender] += msg.value;
+        if(totalAmountRaised >= goalAmount){
+            goalAmountAchieved = true;
+        }
+    }
+
+    // Allow the funds committer to change their mind
     function cancelCommitment(address payable _address, uint _amount) public payable {
-        // require current date is less than endDate
-        require(commitmentAmounts[_address] > 0, "Error: No commitment amount found")
-        _address.transfer(_amount)
+        require(block.timestamp < endDate, "Error: Escrow is closed");
+        require(commitmentAmounts[_address] > 0, "Error: No commitment amount found");
+        _address.transfer(_amount);
+
+        // The goalAmount can be true but then change to false if
+        // someone cancels their commitment
+        if(totalAmountRaised < goalAmount){
+            goalAmountAchieved = false;
+        }
     }
 
     function viewTotalAmountRaised() public view returns(uint){
