@@ -17,7 +17,6 @@ contract CrowdfundingEscrow {
     uint public endDate;
     uint public goalAmount;
     bool public goalAmountAchieved;
-    uint public totalAmountRaised;
     address payable public creator;
     mapping(address => uint) public commitmentAmounts;
 
@@ -29,21 +28,12 @@ contract CrowdfundingEscrow {
         creator = payable(msg.sender);
     }
 
-    // Once endDate is reached, send the funds held in escrow
-    // to the owner of the contract
-    function closeEscrow() public payable {
-        require(block.timestamp >= endDate, "Error: endDate has not been reached");
-        require(totalAmountRaised > 0, "Error: No funds were raised");
-        creator.transfer(totalAmountRaised);
-    }
-
     function commitFunds() public payable {
         require(block.timestamp < endDate, "Error: Escrow is closed");
         require(msg.sender.balance > 0, "Error: No funds");
-
-        totalAmountRaised += msg.value;
+        require(msg.value > 0, "Error: Amount committed must be greater than 0");
         commitmentAmounts[msg.sender] += msg.value;
-        if(totalAmountRaised >= goalAmount){
+        if(address(this).balance >= goalAmount){
             goalAmountAchieved = true;
         }
     }
@@ -53,12 +43,19 @@ contract CrowdfundingEscrow {
         require(block.timestamp < endDate, "Error: Escrow is closed");
         require(commitmentAmounts[msg.sender] > 0, "Error: No commitment amount found");
         payable(msg.sender).transfer(_amount);
-        totalAmountRaised -= _amount;
 
         // The goalAmount can be true but then change to false if
         // someone cancels their commitment
-        if(totalAmountRaised < goalAmount){
+        if(address(this).balance < goalAmount){
             goalAmountAchieved = false;
         }
+    }
+
+    // Once endDate is reached, send the funds held in escrow
+    // to the owner of the contract
+    function closeEscrow() public payable {
+        require(block.timestamp >= endDate, "Error: endDate has not been reached");
+        require(address(this).balance > 0, "Error: No funds were raised");
+        creator.transfer(address(this).balance);
     }
 }
