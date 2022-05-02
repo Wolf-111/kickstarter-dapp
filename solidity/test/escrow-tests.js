@@ -1,4 +1,5 @@
 const { expect, assert, use } = require("chai");
+const { BigNumber } = require("ethers");
 const { ethers, waffle } = require("hardhat");
 const provider = waffle.provider;
 
@@ -15,20 +16,6 @@ describe("CrowdfundingEscrow", function () {
       1651727028,
       10000
     );
-  });
-
-  describe("escrow", () => {
-    it("should still be open", async () => {
-      await contract.deployed();
-      const endDate = await contract.endDate();
-      let currentTimeInSeconds = (Date.now() / 1000).toFixed(0);
-
-      assert.isAtLeast(
-        endDate,
-        currentTimeInSeconds,
-        "endDate is greater than current time"
-      );
-    });
   });
 
   describe("constructor arguments correctly passed", () => {
@@ -57,25 +44,57 @@ describe("CrowdfundingEscrow", function () {
       assert.isAbove(goalAmount, 0, "goalAmount is greater than 0");
     });
 
-    it("endDate must be greater than 0", async () => {
+    it("endDate should be greater than current time", async () => {
       await contract.deployed();
       const endDate = await contract.endDate();
+      let currentTimeInSeconds = (Date.now() / 1000).toFixed(0);
 
-      assert.isAbove(endDate, 0, "goalAmount is greater than 0");
+      assert.isAtLeast(
+        endDate,
+        currentTimeInSeconds,
+        "endDate is greater than current time"
+      );
     });
   });
 
   describe("commitFunds()", () => {
-    it("smart contract balance should increase", async () => {
+    it("smart contract balance should INCREASE", async () => {
       await contract.deployed();
       const initialBalance = await provider.getBalance(contract.address);
       const value = 10;
-      const commitFunds = await contract.commitFunds({ value: value });
+      await contract.commitFunds({ value: value });
       const finalBalance = await provider.getBalance(contract.address);
 
       assert.isAbove(finalBalance, initialBalance);
     });
+  });
 
-    
+  describe("cancelCommitment()", () => {
+    it("smart contract balance should DECREASE", async () => {
+      await contract.deployed();
+      await contract.commitFunds({ value: 10 });
+
+      const initialBalance = await provider.getBalance(contract.address);
+      const value = 5;
+      const cancelCommitment = await contract.cancelCommitment(value);
+      const finalBalance = await provider.getBalance(contract.address);
+      assert.isBelow(finalBalance, initialBalance);
+    });
+  });
+
+  describe("closeEscrow()", () => {
+    it("current time must be greater than endDate", async () => {
+      await contract.deployed();
+
+      assert.isAbove(balance, 0);
+    });
+
+    it("contract funds transfer over to creator", async () => {
+      await contract.deployed();
+      await contract.commitFunds({ value: 10 });
+
+      const balance = await provider.getBalance(contract.address);
+      assert.isAbove(balance, 0);
+    });
   });
 });

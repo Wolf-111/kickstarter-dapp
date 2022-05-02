@@ -26,6 +26,7 @@ contract CrowdfundingEscrow {
         endDate = _endDate;
         goalAmount = _goalAmount;
         creator = payable(msg.sender);
+        console.log(block.timestamp);
     }
 
     function commitFunds() public payable {
