@@ -26,7 +26,6 @@ contract CrowdfundingEscrow {
         endDate = _endDate;
         goalAmount = _goalAmount;
         creator = payable(msg.sender);
-        console.log(block.timestamp);
     }
 
     function commitFunds() public payable {
@@ -54,7 +53,7 @@ contract CrowdfundingEscrow {
 
     // Once endDate is reached, send the funds held in escrow
     // to the owner of the contract
-    function closeEscrow() public payable {
+    function closeEscrow() public {
         require(block.timestamp >= endDate, "Error: endDate has not been reached");
         require(address(this).balance > 0, "Error: No funds were raised");
         creator.transfer(address(this).balance);

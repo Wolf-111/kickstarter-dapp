@@ -82,19 +82,14 @@ describe("CrowdfundingEscrow", function () {
     });
   });
 
-  describe("closeEscrow()", () => {
-    it("current time must be greater than endDate", async () => {
-      await contract.deployed();
+  // describe("closeEscrow()", () => {
+  //   it("contract funds transfer over to creator", async () => {
+  //     await contract.deployed();
+  //     await contract.commitFunds({ value: 10 });
 
-      assert.isAbove(balance, 0);
-    });
-
-    it("contract funds transfer over to creator", async () => {
-      await contract.deployed();
-      await contract.commitFunds({ value: 10 });
-
-      const balance = await provider.getBalance(contract.address);
-      assert.isAbove(balance, 0);
-    });
-  });
+  //     const test = await contract.closeEscrow()
+  //     expect(4).to.throw(Error)
+      
+  //   });
+  // });
 });
