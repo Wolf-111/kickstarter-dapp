@@ -2,5 +2,9 @@
   "name": "hardhat-project",
   "devDependencies": {
     "chai-bignumber": "^3.0.0"
+  },
+  "dependencies": {
+    "@types/react-datepicker": "^4.4.1",
+    "react-datepicker": "^4.7.0"
   }
 }

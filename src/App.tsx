@@ -2,14 +2,16 @@ import React, { useState } from 'react';
 import { ethers, ContractFactory } from "ethers";
 import abi from "./smartContractInfo/abi.json"
 import bytecode from "./smartContractInfo/bytecode.json"
+import DatePicker from "react-datepicker";
 
+import "react-datepicker/dist/react-datepicker.css";
 import './App.css';
 
 function App() {
   const [showListingForm, setShowListingForm] = useState<boolean>(false);
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
-  const [endDate, setEndDate] = useState<number>(0);
+  const [endDate, setEndDate] = useState<Date>(new Date());
   const [goalAmount, setGoalAmount] = useState<number>(0);
   const [deployArgs, setDeployArgs] = useState<any[]>([]);
 
@@ -27,9 +29,9 @@ function App() {
     await provider.send("eth_requestAccounts", []);
     const signer = provider.getSigner();
     const factory = new ContractFactory(abi, bytecode);
+    let formattedEndDate = Math.floor(endDate.getTime() / 1000)
 
-    setDeployArgs([title, description, endDate, goalAmount]);
-
+    setDeployArgs([title, description, formattedEndDate, goalAmount]);
     // If your contract requires constructor args, you can specify them here
     const contract = await factory.deploy(deployArgs);
   }
@@ -44,7 +46,7 @@ function App() {
         <form onSubmit={handleSubmit}>
           <input onChange={(e: any) => setTitle(e.target.value)} placeholder='title' />
           <input onChange={(e: any) => setDescription(e.target.value)} placeholder='description' />
-          <input onChange={(e: any) => setEndDate(e.target.value)} placeholder='end date' />
+          <DatePicker selected={endDate} onChange={(date: any) => setEndDate(date)} />
           <input onChange={(e: any) => setGoalAmount(e.target.value)} placeholder='goal amount' />
           <button type='submit'>Submit</button>
         </form>
