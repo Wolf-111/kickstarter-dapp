@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { ethers, ContractFactory } from "ethers";
 import abi from "./smartContractInfo/abi.json"
 import bytecode from "./smartContractInfo/bytecode.json"
-
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import './App.css';
 
 function App() {
