@@ -13,7 +13,6 @@ function App() {
   const [description, setDescription] = useState<string>("");
   const [endDate, setEndDate] = useState<Date>(new Date());
   const [goalAmount, setGoalAmount] = useState<number>(0);
-  const [deployArgs, setDeployArgs] = useState<any[]>([]);
 
   function handleListProject(): void {
     setShowListingForm(true);
@@ -23,17 +22,17 @@ function App() {
 
   }
 
-  async function handleSubmit(): Promise<void> {
+  async function handleSubmit(e: any): Promise<void> {
+    e.preventDefault();
     const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
     // Prompt user for account connections
     await provider.send("eth_requestAccounts", []);
     const signer = provider.getSigner();
-    const factory = new ContractFactory(abi, bytecode);
+    const factory = new ContractFactory(abi, bytecode, signer);
     let formattedEndDate = Math.floor(endDate.getTime() / 1000)
 
-    setDeployArgs([title, description, formattedEndDate, goalAmount]);
-    // If your contract requires constructor args, you can specify them here
-    const contract = await factory.deploy(deployArgs);
+    // Make sure to pass constructor args here
+    const contract = await factory.deploy(title, description, formattedEndDate, goalAmount);
   }
 
   return (
